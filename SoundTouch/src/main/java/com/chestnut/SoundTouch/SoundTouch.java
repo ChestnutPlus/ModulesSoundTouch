@@ -36,10 +36,14 @@ public final class SoundTouch
 
     public void close()
     {
-        deleteInstance(handle);
-        handle = 0;
-        if (singleThreadExecutor!=null)
-            singleThreadExecutor.shutdown();
+        try {
+            deleteInstance(handle);
+            handle = 0;
+            if (singleThreadExecutor!=null)
+                singleThreadExecutor.shutdown();
+        } catch (Exception e) {
+            Log.e("SoundTouch:close:",e.getMessage());
+        }
     }
 
 

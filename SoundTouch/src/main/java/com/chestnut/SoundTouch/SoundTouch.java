@@ -1,6 +1,5 @@
 package com.chestnut.SoundTouch;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
@@ -87,18 +86,22 @@ public final class SoundTouch
         void onFail(String inputFile, String outputFile, int errorCode);
     }
 
-    public void processFile(final String inputFile, final String outputFile,@NonNull final CallBack callBack) {
-        callBack.onStart(inputFile,outputFile);
+    public void processFile(final String inputFile, final String outputFile,final CallBack callBack) {
+        if (callBack!=null)
+            callBack.onStart(inputFile,outputFile);
         singleThreadExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 int result = processFile(handle, inputFile, outputFile);
                 Log.e("SoundTouch:processFile:",result+"");
                 if (result==0) {
-                    callBack.onSuccess(inputFile, outputFile);
+                    if (callBack!=null)
+                        callBack.onSuccess(inputFile, outputFile);
                 }
-                else
-                    callBack.onFail(inputFile,outputFile,result);
+                else {
+                    if (callBack!=null)
+                        callBack.onFail(inputFile, outputFile, result);
+                }
             }
         });
     }

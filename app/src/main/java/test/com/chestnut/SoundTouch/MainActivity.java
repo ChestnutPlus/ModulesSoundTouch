@@ -8,12 +8,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
-import com.chestnut.SoundTouch.SoundTouch;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private SoundTouch soundTouch;
+    private Recorder recorder = new Recorder();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
         BtnsAdapter btnsAdapter = new BtnsAdapter(titles,this);
         recyclerView.setAdapter(btnsAdapter);
         btnsAdapter.setOnItemClickListener(onItemListener);
-
-        soundTouch = new SoundTouch();
     }
 
     private BtnsAdapter.OnItemListener onItemListener = new BtnsAdapter.OnItemListener() {
@@ -48,40 +48,28 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void onClick0() {
-        soundTouch.setPitchSemiTones(1)
-                .setPitchSemiTones(2)
-                .setSpeed(10)
-                .processFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/hehe.wav",
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/hehexxx.wav",
-                        new SoundTouch.CallBack() {
-                            @Override
-                            public void onStart(String inputFile, String outputFile) {
-                                Log.e("SoundTouch-onStart","input:"+inputFile+",output:"+outputFile);
-                            }
 
-                            @Override
-                            public void onSuccess(String inputFile, String outputFile) {
-                                Log.e("SoundTouch-onSuccess","input:"+inputFile+",output:"+outputFile);
-                            }
-
-                            @Override
-                            public void onFail(String inputFile, String outputFile, int errorCode) {
-                                Log.e("SoundTouch-onFail","input:"+inputFile+",output:"+outputFile+",errCode:"+errorCode);
-                            }
-                        });
     }
 
     private void onClick1() {
-
+        recorder.record(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/_"+ System.currentTimeMillis()+".wav",1,-3,1)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        Log.e("recorder",""+integer);
+                    }
+                });
     }
 
     private void onClick2() {
-
+        recorder.stop();
     }
 
     private String[] titles = {
-            "0",
-            "1",
-            "2"
+            "播放",
+            "start",
+            "stop"
     };
 }

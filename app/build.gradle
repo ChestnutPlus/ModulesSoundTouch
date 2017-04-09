@@ -21,5 +21,7 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:design:25.3.0'
+    compile 'com.github.ChestnutPlus:ModulesCommon:1.0.2'
     compile project(path: ':SoundTouch')
+    compile files('libs/SoundTouch.jar')
 }

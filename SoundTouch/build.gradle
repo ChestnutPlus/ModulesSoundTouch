@@ -1,19 +1,27 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 1
+        targetSdkVersion 26
+        versionCode 2
         versionName "1.0.0"
         /**
          *      1.0.0   2017年3月27日21:22:18  离子
          *          Initial完成。
          *
+         *      1.0.0-2
+         *          2018年10月10日14:46:39
+         *              升级版本
+         *
          */
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         release {

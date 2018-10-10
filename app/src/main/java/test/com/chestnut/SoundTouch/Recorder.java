@@ -5,8 +5,9 @@ import android.util.Log;
 
 import com.chestnut.SoundTouch.SoundTouch;
 
-import rx.Observable;
-import rx.Subscriber;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 
 /**
  * Created by Chestnut on 2017/4/9.
@@ -23,27 +24,27 @@ public class Recorder {
     }
 
     public Observable<Integer> record(final String outPutFile, final float tempo, final float pitch, final float speed) {
-        return Observable.create(new Observable.OnSubscribe<Integer>() {
+        return Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
-            public void call(final Subscriber<? super Integer> subscriber) {
+            public void subscribe(final ObservableEmitter<Integer> emitter) throws Exception {
                 audioRecordHelper.init(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/Test.pmc");
                 audioRecordHelper.setCallBack(new AudioRecordHelper.CallBack() {
                     @Override
                     public void onRecordStart(String file) {
                         Log.w("onRecordStart",file);
-                        subscriber.onNext(-2);
+                        emitter.onNext(-2);
                     }
 
                     @Override
                     public void onRecordDBChange(double dbValue) {
                         Log.w("onRecordDBChange",dbValue+"");
-                        subscriber.onNext((int)dbValue);
+                        emitter.onNext((int)dbValue);
                     }
 
                     @Override
                     public void onRecordFail(String file, String msg) {
                         Log.w("onRecordFail",file+","+msg);
-                        subscriber.onNext(-1);
+                        emitter.onNext(-1);
                     }
 
                     @Override
@@ -63,13 +64,13 @@ public class Recorder {
                                             @Override
                                             public void onSuccess(String inputFile, String outputFile) {
                                                 Log.e("SoundTouch-onSuccess","input:"+inputFile+",output:"+outputFile);
-                                                subscriber.onNext(0);
+                                                emitter.onNext(0);
                                             }
 
                                             @Override
                                             public void onFail(String inputFile, String outputFile, int errorCode) {
                                                 Log.e("SoundTouch-onFail","input:"+inputFile+",output:"+outputFile+",errCode:"+errorCode);
-                                                subscriber.onNext(-1);
+                                                emitter.onNext(-1);
                                             }
                                         });
                     }

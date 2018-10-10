@@ -1,75 +1,51 @@
 package test.com.chestnut.SoundTouch;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import com.chestnut.common.helper.MediaPlayerHelper;
+import com.chestnut.common.utils.LogUtils;
 
+import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity implements View.OnClickListener{
 
     private Recorder recorder = new Recorder();
+    private MediaPlayerHelper mediaPlayerHelper = new MediaPlayerHelper();
+    private String wav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        BtnsAdapter btnsAdapter = new BtnsAdapter(titles,this);
-        recyclerView.setAdapter(btnsAdapter);
-        btnsAdapter.setOnItemClickListener(onItemListener);
+        findViewById(R.id.btn_play).setOnClickListener(this);
+        findViewById(R.id.btn_start).setOnClickListener(this);
+        findViewById(R.id.btn_end).setOnClickListener(this);
+        mediaPlayerHelper.init(this);
     }
 
-    private BtnsAdapter.OnItemListener onItemListener = new BtnsAdapter.OnItemListener() {
-        @Override
-        public void onItemOnClick(BtnsAdapter btnsAdapter, View view, int position) {
-            Log.w("onItemListener:",position+"");
-            switch (position) {
-                case 0:
-                    onClick0();
-                    break;
-                case 1:
-                    onClick1();
-                    break;
-                case 2:
-                    onClick2();
-                    break;
-            }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_play:
+                if (wav!=null) {
+                    mediaPlayerHelper.setUrl(wav);
+                    mediaPlayerHelper.play();
+                }
+                break;
+            case R.id.btn_start:
+                wav = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/_"+ System.currentTimeMillis()+".wav";
+                recorder.record(wav,1,-3,1)
+                        .subscribeOn(Schedulers.newThread())
+                        .subscribe(integer -> {
+                            LogUtils.i("MainActivity","record:"+integer);
+                        });
+                break;
+            case R.id.btn_end:
+                recorder.stop();
+                break;
         }
-    };
-
-    private void onClick0() {
-
     }
-
-    private void onClick1() {
-        recorder.record(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)+"/_"+ System.currentTimeMillis()+".wav",1,-3,1)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer integer) {
-                        Log.e("recorder",""+integer);
-                    }
-                });
-    }
-
-    private void onClick2() {
-        recorder.stop();
-    }
-
-    private String[] titles = {
-            "播放",
-            "start",
-            "stop"
-    };
 }
